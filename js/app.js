@@ -15,7 +15,6 @@
   var page = document.getElementById("page");
   var side = document.getElementById("side");
   var endEl = document.getElementById("end");
-  var track = document.getElementById("track");
   var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   var cache = {};
@@ -100,10 +99,9 @@
   }
 
   function markMode() {
-    Array.prototype.forEach.call(document.querySelectorAll(".switch .lab"), function (b) {
+    Array.prototype.forEach.call(document.querySelectorAll(".mood .ico"), function (b) {
       b.setAttribute("aria-pressed", String(b.dataset.mode === mode));
     });
-    track.setAttribute("aria-checked", String(mode === "rabbit"));
   }
 
   function renderAll(m) {
@@ -297,10 +295,9 @@
     if (m === mode) return;
     location.hash = hashFor("hi", m);   // switching the way you read starts the reading over
   }
-  Array.prototype.forEach.call(document.querySelectorAll(".switch .lab"), function (b) {
+  Array.prototype.forEach.call(document.querySelectorAll(".mood .ico"), function (b) {
     b.addEventListener("click", function () { setMode(b.dataset.mode); });
   });
-  track.addEventListener("click", function () { setMode(mode === "rabbit" ? "tortoise" : "rabbit"); });
 
   side.addEventListener("click", function (e) {
     var a = e.target.closest && e.target.closest("a");

@@ -18,10 +18,13 @@
   </main>
 
   <footer class="foot" id="foot">
-    <div class="switch" role="group" aria-label="Reading mode">
-      <button type="button" class="lab" data-mode="tortoise" aria-pressed="true">Tortoise</button>
-      <button type="button" class="track" id="track" role="switch" aria-checked="false" aria-label="Rabbit mode (quick facts)"></button>
-      <button type="button" class="lab" data-mode="rabbit" aria-pressed="false">Rabbit</button>
+    <div class="mood" role="group" aria-label="Reading mood">
+      <button type="button" class="ico" data-mode="tortoise" aria-pressed="true" aria-label="Tortoise: the slow way, with stories" title="Tortoise">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M5 22C5 13 10.5 8.5 16.5 8.5S27 13 27 22Z"/><path d="M11 22c0-5 2.2-8.5 5.5-8.5S22 17 22 22"/><path d="M16.5 13.5V22"/><path d="M27 19.5c2-.9 3.8 0 3.8 1.9 0 1.5-1.4 2.1-3 1.6"/><path d="M9 22v3.5M22 22v3.5"/><path d="M5 21.5 2.5 23"/></svg>
+      </button>
+      <button type="button" class="ico" data-mode="rabbit" aria-pressed="false" aria-label="Rabbit: the quick way, facts only" title="Rabbit">
+        <svg viewBox="2.5 0.5 28.5 29" aria-hidden="true"><ellipse cx="14" cy="21.5" rx="8" ry="5.5"/><circle cx="23" cy="14.5" r="3.8"/><path d="M21.4 11.5C19.6 6 20.4 2.5 22.4 2.5c2 .6 2.2 4.8 1.8 8.4"/><path d="M24.6 11.4c.9-5.3 2.6-7.6 4.3-6.8 1.4 1.3-.1 4.8-1.9 7.4"/><circle cx="6.2" cy="19.6" r="1.7"/><path d="M11 26.5v1.8M18 26.5v1.8"/></svg>
+      </button>
     </div>
     <p class="end" id="end" hidden></p>
   </footer>

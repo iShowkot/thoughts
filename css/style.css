@@ -128,20 +128,15 @@ p br { line-height: 1.9; }
 }
 .foot::before { content: ""; display: block; width: 3rem; border-top: 1px solid var(--rule); margin-bottom: 1.8rem; }
 
-.switch { display: flex; align-items: center; gap: .8rem; }
-.switch .lab { font: inherit; color: var(--quiet); background: none; border: 0; padding: .2rem 0; cursor: pointer; }
-.switch .lab:hover { color: var(--ink); }
-.switch .lab[aria-pressed="true"], .switch .lab[aria-pressed="true"]:hover { color: var(--blue); }
-.track {
-  position: relative; flex: none; width: 2.6rem; height: 1.4rem; padding: 0; cursor: pointer;
-  border: 1.5px solid var(--blue); border-radius: 999px; background: none;
+.mood { display: flex; align-items: center; gap: .5rem; }
+.ico {
+  width: 2.5rem; height: 2.5rem; padding: 0; display: grid; place-items: center; cursor: pointer;
+  color: var(--quiet); background: none; border: 0; border-radius: 50%;
+  transition: color .2s ease, background-color .2s ease;
 }
-.track::after {
-  content: ""; position: absolute; top: 2px; left: 2px;
-  width: calc(1.4rem - 7px); height: calc(1.4rem - 7px); border-radius: 50%;
-  background: var(--blue); transition: transform .25s ease;
-}
-.track[aria-checked="true"]::after { transform: translateX(1.2rem); }
+.ico svg { width: 1.7rem; height: 1.7rem; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.ico:hover { color: var(--ink); }
+.ico[aria-pressed="true"], .ico[aria-pressed="true"]:hover { color: var(--blue); background: var(--blue-soft); }
 
 .end { margin: 2.6rem 0 0; font-size: .9rem; }
 .end a { text-decoration: underline; text-underline-offset: .18em; }
@@ -163,5 +158,5 @@ body.dev .end.ph { outline: none; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   main { transition: none; }
-  .juggle, .juggle .w, .juggle .w::after, .track::after { transition: none; }
+  .juggle, .juggle .w, .juggle .w::after, .ico { transition: none; }
 }
