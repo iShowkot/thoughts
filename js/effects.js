@@ -217,20 +217,20 @@
     ctx.clearRect(0, 0, this.off.width, this.off.height);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    var cs = getComputedStyle(wordEl);
-    var text = wordEl.textContent;
-    ctx.font = cs.fontStyle + " " + cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily;
     ctx.fillStyle = INK;
     ctx.textBaseline = "alphabetic";
-
-    var range = document.createRange();
-    range.selectNodeContents(wordEl);
-    var tr = range.getBoundingClientRect(), sr = this.slot.getBoundingClientRect();
-    var m = ctx.measureText(text);
-    var asc = m.fontBoundingBoxAscent || parseFloat(cs.fontSize) * 0.8;
-    var x0 = tr.left - sr.left + this.padX;
-    var base = tr.top - sr.top + this.padY + asc;
-    ctx.fillText(text, x0, base);
+    var sr = this.slot.getBoundingClientRect(), range = document.createRange();
+    // draw each piece of text in its own weight (the article stays light, the word may be bold)
+    var walker = document.createTreeWalker(wordEl, NodeFilter.SHOW_TEXT), tn;
+    while ((tn = walker.nextNode())) {
+      if (!/\S/.test(tn.data)) continue;
+      var cs = getComputedStyle(tn.parentElement);
+      ctx.font = cs.fontStyle + " " + cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily;
+      range.selectNodeContents(tn);
+      var tr = range.getBoundingClientRect();
+      var asc = ctx.measureText(tn.data).fontBoundingBoxAscent || parseFloat(cs.fontSize) * 0.8;
+      ctx.fillText(tn.data.replace(/\s+$/, ""), tr.left - sr.left + this.padX, tr.top - sr.top + this.padY + asc);
+    }
 
     var step = Math.max(1, Math.round(stride * dpr));
     var data = ctx.getImageData(0, 0, this.off.width, this.off.height).data, W = this.off.width, H = this.off.height;

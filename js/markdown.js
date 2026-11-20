@@ -29,7 +29,8 @@
       var plain = words.join(", ");
       var spans = words.map(function (w, i) {
         var last = i === words.length - 1;
-        return '<span class="w' + (last ? " stay" : "") + '" data-i="' + i + '">' + w + "</span>";
+        var mm = /^(an?)\s+(.+)$/.exec(w), inner = mm ? mm[1] + " <span class=\"nn\">" + mm[2] + "</span>" : '<span class="nn">' + w + "</span>";
+        return '<span class="w' + (last ? " stay" : "") + '" data-i="' + i + '">' + inner + "</span>";
       }).join("");
       return '<span class="sr-only">' + plain + '</span><span class="juggle" aria-hidden="true">' + spans + "</span>";
     });

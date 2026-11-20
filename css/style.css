@@ -103,6 +103,7 @@ hr { border: 0; border-top: 1px solid var(--rule); margin: 2.4rem 0; }
 .juggle .w.on { opacity: 1; }
 .juggle .w.stay { position: static; opacity: 1; pointer-events: auto; }
 .juggle.playing .w.stay { position: absolute; opacity: 0; }
+.juggle .w.stay .nn { font-weight: 600; }          /* the word that stays is bold; the article never is */
 .juggle.playing .w.stay.on { opacity: 1; }
 
 /* Poem and line-break friendly paragraphs keep their line breaks */
