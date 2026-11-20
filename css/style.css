@@ -64,15 +64,33 @@ strong { font-weight: 600; }
 hr { border: 0; border-top: 1px solid var(--rule); margin: 2.4rem 0; }
 ::selection { background: var(--blue-soft); }
 
-/* Links: solid underline = goes somewhere. Dotted underline = opens a small card. */
-a, .pop { color: var(--blue); }
-main a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .18em; }
-main a:hover { text-decoration-thickness: 2px; }
-.pop {
-  font: inherit; background: none; border: 0; padding: 0; cursor: pointer;
-  text-decoration: underline dotted; text-decoration-thickness: 1.5px; text-underline-offset: .22em;
+/* Links are capsules: a solid colour with a soft corner radius.
+   Solid blue goes somewhere. Pale blue opens a small card. Both react to hover and click (js/fx.js). */
+.sec a, .end a, .card a, .pop {
+  display: inline-block; vertical-align: baseline;
+  padding: .04em .55em; margin: 0 .04em;
+  border-radius: 6px; text-decoration: none; line-height: 1.5;
+  cursor: pointer;
+  transition: transform .16s ease, box-shadow .2s ease, background-color .2s ease;
 }
-.pop:hover, .pop[aria-expanded="true"] { background: var(--blue-soft); }
+.sec a, .end a, .card a { background-color: var(--blue); color: #fff; }
+.pop { font: inherit; line-height: 1.5; background-color: var(--blue-soft); color: var(--blue); border: 0; }
+
+.sec a:hover, .end a:hover, .card a:hover, .pop:hover, .pop[aria-expanded="true"] {
+  transform: translateY(-1px);
+  background-size: 260% 100%;
+  animation: sheen 1.6s linear infinite;
+}
+.sec a:hover, .end a:hover, .card a:hover {
+  background-image: linear-gradient(100deg, #1D3FBF 0%, #4F6FE8 30%, #8A5CE0 55%, #E4572E 78%, #1D3FBF 100%);
+  box-shadow: 0 4px 12px rgba(29, 63, 191, .28);
+}
+.pop:hover, .pop[aria-expanded="true"] {
+  background-image: linear-gradient(100deg, #E8ECFA 0%, #CFD9FB 30%, #E6DAFA 55%, #FADCD2 78%, #E8ECFA 100%);
+  box-shadow: 0 4px 12px rgba(29, 63, 191, .14);
+}
+.sec a:active, .end a:active, .card a:active, .pop:active { transform: translateY(0) scale(.97); }
+@keyframes sheen { to { background-position: 260% 0; } }
 
 :focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 2px; }
 
@@ -104,7 +122,6 @@ p br { line-height: 1.9; }
 .card h3 { margin: 0 0 .3rem; font-size: 14px; font-weight: 600; }
 .card p { margin: 0 0 .5rem; }
 .card p:last-child { margin-bottom: 0; }
-.card a { text-decoration: underline; text-underline-offset: .18em; }
 
 /* The end of each page: found by finishing it, or by looking */
 .foot {
@@ -131,7 +148,6 @@ p br { line-height: 1.9; }
 .ico[aria-pressed="true"], .ico[aria-pressed="true"]:hover { color: var(--blue); background: var(--blue-soft); }
 
 .end { margin: 2.2rem 0 0; font-size: 12px; }
-.end a { text-decoration: underline; text-underline-offset: .18em; }
 .end span + span::before { content: "·"; margin: 0 .6em; color: var(--rule); }
 
 /* Placeholders: invisible to readers, visible while building (add ?dev to the address) */
@@ -149,4 +165,5 @@ body.dev .end.ph { outline: none; }
   html { scroll-behavior: auto; }
   main { transition: none; }
   .juggle .w, .ico { transition: none; }
+  .sec a:hover, .end a:hover, .card a:hover, .pop:hover, .pop[aria-expanded="true"] { animation: none; transform: none; }
 }
