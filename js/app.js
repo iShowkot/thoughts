@@ -73,17 +73,6 @@
     if (now) go(); else hashTimer = setTimeout(go, 300);   // never touch the address bar mid-scroll
   }
 
-  // sections taller than the screen scroll freely; only shorter ones snap
-  function markTall() {
-    SECTIONS.forEach(function (s) {
-      var sec = sectionEls[s.id];
-      sec.classList.toggle("tall", sec.scrollHeight > window.innerHeight + 4);
-    });
-  }
-  var resizeTimer = null;
-  window.addEventListener("resize", function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(markTall, 150); });
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(markTall);
-
   /* ---------- the page is one long scroll: a section per tab, snapping one by one ---------- */
 
   function buildSkeleton() {
@@ -134,7 +123,6 @@
         sectionEls[s.id].innerHTML = '<div class="in">' + (md === null ? "<p>This page isn't written yet.</p>" : MD.render(md)) + "</div>";
       });
       renderEnd(m);
-      markTall();
       var j = page.querySelector(".juggle");
       if (j) startJuggle(j);
     });
@@ -189,54 +177,53 @@
     endEl.hidden = bits.length === 0;
   }
 
-  /* ---------- the opening line: words arrive one by one, each struck through
-     with a blue pen line, and only the last (Thinker) stays. Once per visit. ---------- */
+  /* ---------- the opening line: words arrive one by one, each disintegrates in its own way,
+     and only the last (Thinker) stays. Once per visit. ---------- */
 
   function startJuggle(slot) {
-    if (get("sessionStorage", "juggled") === "1" || reduceMotion || mode !== "tortoise") return;
+    if (get("sessionStorage", "juggled") === "1" || reduceMotion || mode !== "tortoise" || !window.Burst) return;
     set("sessionStorage", "juggled", "1");
 
     var words = Array.prototype.slice.call(slot.querySelectorAll(".w"));
     if (words.length < 2) return;
     var keep = words[words.length - 1];
 
-    // measure while everything is in its resting state, then freeze the slot at the widest word
+    // freeze the slot at the widest word so the sentence around it never moves
     var widest = 0;
     words.forEach(function (w) { widest = Math.max(widest, w.getBoundingClientRect().width); });
-    var finalWidth = keep.getBoundingClientRect().width;
     slot.style.width = Math.ceil(widest) + "px";
+    keep.style.transition = "none";            // no flash of the final word before it is gathered
     slot.classList.add("playing");
-    words.forEach(function (w) { w.classList.remove("on", "struck"); });
+    words.forEach(function (w) { w.classList.remove("on"); });
+    void keep.offsetWidth;
+    keep.style.transition = "";
 
+    var stage = Burst.create(slot);
     function alive() { return slot.isConnected; }
-
-    function showAndStrike(w) {
-      w.classList.add("on");
-      return sleep(300).then(function () {
-        if (!alive()) return;
-        w.classList.add("struck");
-        return sleep(420);
-      }).then(function () {
-        if (!alive()) return;
-        w.classList.remove("on");
-        return sleep(240);
-      });
-    }
 
     var chain = sleep(700);
     words.slice(0, -1).forEach(function (w) {
-      chain = chain.then(function () { return alive() ? showAndStrike(w) : null; });
+      chain = chain.then(function () {
+        if (!alive()) return;
+        w.classList.add("on");
+        return sleep(460).then(function () {            // arrives, is read, then leaves
+          if (!alive()) return;
+          return stage.out(w, Burst.forWord(w.textContent));
+        });
+      });
     });
     chain.then(function () {
       if (!alive()) return;
-      keep.classList.add("on");
-      slot.style.width = Math.ceil(finalWidth) + "px";
-      return sleep(700);
+      return stage.gather(keep);
     }).then(function () {
       if (!alive()) return;
+      keep.classList.add("on");
+      return sleep(320);
+    }).then(function () {
+      stage.destroy();
+      if (!alive()) return;
       slot.classList.remove("playing");
-      slot.style.width = "";
-      words.forEach(function (w) { w.classList.remove("on", "struck"); });
+      words.forEach(function (w) { w.classList.remove("on"); w.style.transition = ""; w.style.opacity = ""; });
     });
   }
 

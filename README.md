@@ -29,7 +29,7 @@ Sections: `hi`, `education`, `designs`, `poetry`, `artworks`, `infinity`.
 | `[text](https://example.com)` | a real link (solid underline) |
 | `[text]{key}` | a popover card (dotted underline), defined in `content/popovers.json` |
 | `**bold**` `*italic*` | bold, italic |
-| `{{juggle: A\|B\|C}}` | the opening line: words arrive one by one, each struck through with a blue pen line; the last word is the one that stays |
+| `{{juggle: A\|B\|C}}` | the opening line: words arrive one by one and each disintegrates in its own way (shapes, paint, ink, sand, scan, sparks, see `js/effects.js`); the last word is the one that stays |
 | `[[placeholder]]` at the end of a paragraph or list item | flags it as made-up text |
 
 ### Popovers
@@ -69,7 +69,7 @@ GitHub repo, Settings, Pages: deploy from the `main` branch, root folder. The si
 
 ## Layout
 
-One long page, one section per tab, and scrolling settles on each section in turn. On wide screens a quiet vertical list of sections sits on the left. On phones there are no tabs at all, only the scroll. The Tortoise / Rabbit mood switch (two small icons, like a light/dark switch) stays pinned in the bottom-right corner so it can be changed at any moment, and switching keeps you in the same section. The contact line is the last, smallest thing at the end.
+One long, compact page: one section per tab, stacked close together. On wide screens a quiet vertical list of sections sits on the left. On phones there are no tabs at all, only the scroll. The Tortoise / Rabbit mood switch (two small icons, like a light/dark switch) stays pinned in the bottom-right corner so it can be changed at any moment, and switching keeps you in the same section. The contact line is the last, smallest thing at the end.
 
 ## Addresses
 

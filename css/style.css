@@ -21,7 +21,7 @@
 }
 
 * { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; scroll-snap-type: y proximity; }
+html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
   background: var(--paper);
@@ -49,13 +49,8 @@ body {
 
 /* Reading column */
 main { outline: none; }
-.sec {
-  min-height: 100vh; min-height: 100svh;
-  scroll-snap-align: start; scroll-snap-stop: normal;
-  display: flex; flex-direction: column; justify-content: center;
-  padding: 4rem 1.25rem;
-}
-.sec.tall { scroll-snap-align: none; }          /* long sections scroll freely; only short ones snap */
+.sec { padding: 2.4rem 1.25rem; }
+.sec:first-child { padding-top: 5rem; }
 .sec > .in { width: 100%; max-width: var(--measure); margin: 0 auto; }
 main.fading { opacity: 0; }
 main { transition: opacity .18s ease; }
@@ -81,23 +76,15 @@ main a:hover { text-decoration-thickness: 2px; }
 
 :focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; border-radius: 2px; }
 
-/* The opening line: words come one at a time, each is struck through with a blue pen
-   line, and only the last one (Thinker) stays. */
-.juggle { display: inline-block; position: relative; white-space: nowrap; transition: width .5s ease; }
+/* The opening line: each word leaves in its own way (see js/effects.js), the last one stays.
+   The slot is frozen at the widest word's width while it plays, so nothing around it moves. */
+.juggle { display: inline-block; position: relative; white-space: nowrap; }
 .juggle::before { content: "\200b"; }               /* keeps the baseline while words are absolute */
 .juggle .w { position: absolute; left: 0; top: 0; opacity: 0; pointer-events: none; transition: opacity .22s ease; }
 .juggle .w.on { opacity: 1; }
 .juggle .w.stay { position: static; opacity: 1; pointer-events: auto; }
 .juggle.playing .w.stay { position: absolute; opacity: 0; }
 .juggle.playing .w.stay.on { opacity: 1; }
-.juggle .w:not(.stay)::after {
-  content: ""; position: absolute; left: -3%; top: 54%;
-  width: 0; height: 2px; border-radius: 2px;
-  background: var(--blue);
-  transform: rotate(-1.6deg); transform-origin: left center;
-  transition: width .34s cubic-bezier(.3, .6, .3, 1);
-}
-.juggle .w.struck::after { width: 106%; }
 
 /* Poem and line-break friendly paragraphs keep their line breaks */
 p br { line-height: 1.9; }
@@ -121,9 +108,8 @@ p br { line-height: 1.9; }
 
 /* The end of each page: found by finishing it, or by looking */
 .foot {
-  scroll-snap-align: end;
   max-width: var(--measure); margin: 0 auto;
-  padding: 3.5rem 1.25rem 5rem;
+  padding: 2.5rem 1.25rem 5rem;
   font-size: .98rem; line-height: 1.6; color: var(--quiet);
 }
 .foot::before { content: ""; display: block; width: 3rem; border-top: 1px solid var(--rule); margin-bottom: 1.8rem; }
@@ -164,5 +150,5 @@ body.dev .end.ph { outline: none; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   main { transition: none; }
-  .juggle, .juggle .w, .juggle .w::after, .ico { transition: none; }
+  .juggle .w, .ico { transition: none; }
 }
