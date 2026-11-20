@@ -12,19 +12,22 @@
 </head>
 <body>
   <header class="top">
-    <nav class="tabs" id="tabs" aria-label="Sections"></nav>
-    <div class="mode" role="group" aria-label="Reading mode">
-      <button type="button" data-mode="tortoise" aria-pressed="true">Tortoise</button>
-      <span aria-hidden="true">/</span>
-      <button type="button" data-mode="rabbit" aria-pressed="false">Rabbit</button>
-    </div>
+    <nav class="tabs" id="tabs-top" aria-label="Sections"></nav>
   </header>
 
   <main id="page" tabindex="-1" aria-live="polite">
     <noscript><p>This site needs JavaScript to switch between the slow way (Tortoise) and the quick way (Rabbit).</p></noscript>
   </main>
 
-  <footer class="end" id="end" hidden></footer>
+  <footer class="foot" id="foot">
+    <nav class="tabs tabs-foot" id="tabs-foot" aria-label="Sections"></nav>
+    <div class="switch" role="group" aria-label="Reading mode">
+      <button type="button" class="lab" data-mode="tortoise" aria-pressed="true">Tortoise</button>
+      <button type="button" class="track" id="track" role="switch" aria-checked="false" aria-label="Rabbit mode (quick facts)"></button>
+      <button type="button" class="lab" data-mode="rabbit" aria-pressed="false">Rabbit</button>
+    </div>
+    <p class="end" id="end" hidden></p>
+  </footer>
 
   <script src="js/markdown.js"></script>
   <script src="js/app.js"></script>
