@@ -24,7 +24,7 @@
   var active = "hi";        // the section currently being read
   var lockSpy = false;      // ignore the scroll spy while we scroll somewhere on purpose
   var sectionEls = {};
-  var juggled = false;      // the opening line plays once per page load, when you can actually see it
+  var juggled = false;      // the opening line plays each time a mode is shown, when you can actually see it
   var juggleWatch = null;
 
   /* ---------- small helpers ---------- */
@@ -121,6 +121,7 @@
 
   function renderAll(m) {
     mode = m;
+    juggled = false;                                // every switch plays the opening line again, in either mode
     set("localStorage", "mode", m);
     markMode();
     return Promise.all(SECTIONS.map(function (s) {
@@ -234,7 +235,7 @@
     return true;
   }
 
-  function willPlay() { return !juggled && !reduceMotion && mode === "tortoise" && !!window.Burst; }
+  function willPlay() { return !juggled && !reduceMotion && !!window.Burst; }
 
   function startJuggle(slot) {
     if (!willPlay()) return;

@@ -30,3 +30,5 @@ Your Hi and Education text was kept as written, with only mistakes fixed. Reject
 
 ## Kept on purpose
 "Ha ha...", the sentence fragments, "Btw", "pagebook", and your line rhythm.
+
+- Rabbit Hi: the list "Designer, artist, poet, writer, observer, mentor and thinker" became "a {{juggle: …}}" so the same opening-line effect plays in both modes (screen readers still get the full list).

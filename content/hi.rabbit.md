@@ -1,6 +1,6 @@
 # Hi!
 
-I am Showkot Shawon. Designer, artist, poet, writer, observer, mentor and thinker.
+I am Showkot Shawon, a {{juggle: Designer|Artist|Poet|Writer|Observer|Mentor|Thinker}}.
 
 I am VP of Product Design at Ollyo, leading design for [Tutor LMS]{tutor-lms} and [Kirki eCommerce]{kirki-ecommerce} with a team of 16.
 
