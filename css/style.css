@@ -153,36 +153,38 @@ p br { line-height: 1.9; }
 }
 .ico svg { width: 1.6rem; height: 1.6rem; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; overflow: visible; }
 .ico svg .dot { fill: currentColor; stroke: none; }
-.ico svg * { transform-box: fill-box; transform-origin: 50% 100%; }
-
-/* on switching, the animal that was chosen moves: the rabbit runs, the tortoise plods */
-.ico.go[data-mode="rabbit"] svg { animation: run 1.05s cubic-bezier(.3, .6, .4, 1); }
-.ico.go[data-mode="rabbit"] svg .legA { animation: kick .22s ease-in-out 4; }
-.ico.go[data-mode="tortoise"] svg { animation: plod 2.1s ease-in-out; }
-.ico.go[data-mode="tortoise"] svg .legA { animation: step 1.05s ease-in-out 2; }
-.ico.go[data-mode="tortoise"] svg .legB { animation: step 1.05s ease-in-out 2 .52s; }
-.ico.go[data-mode="tortoise"] svg .bod { animation: rock 1.05s ease-in-out 2; }
-@keyframes run {
-  0%   { transform: translate(-7px, 0) scale(1.08, .92); opacity: .5; }
-  14%  { transform: translate(-3px, -5px) rotate(-5deg); opacity: 1; }
-  28%  { transform: translate(0, 0) scale(1.05, .95); }
-  42%  { transform: translate(2px, -6px) rotate(-6deg); }
-  58%  { transform: translate(3px, 0) scale(1.05, .95); }
-  72%  { transform: translate(1px, -4px) rotate(-3deg); }
-  100% { transform: none; }
-}
-@keyframes kick { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-22deg); } }
-@keyframes plod {
-  0%   { transform: translateX(-6px); opacity: .5; }
-  15%  { opacity: 1; }
-  100% { transform: none; }
-}
-@keyframes step { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1.6px) rotate(8deg); } }
-@keyframes rock { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-3deg); } 75% { transform: rotate(3deg); } }
-
-.ico:hover { color: var(--ink); }
-.ico:active { transform: scale(.88); }
+.ico svg * { transform-box: view-box; }
 .ico[aria-pressed="true"], .ico[aria-pressed="true"]:hover { color: var(--blue); }
+
+/* On switching, the chosen animal moves the way it really does.
+   Rabbit: three bounds (gather, stretch out, land), ears streaming back, forelegs reaching, hind legs kicking.
+   Tortoise: a slow diagonal walk, the head easing out with each step, the shell swaying. */
+.ico.go[data-mode="rabbit"] .r-all { animation: r-travel 1.45s cubic-bezier(.25,.6,.35,1); transform-origin: 16px 29px; }
+.ico.go[data-mode="rabbit"] .r-body { animation: r-bound .48s ease-in-out 3; transform-origin: 14px 24px; }
+.ico.go[data-mode="rabbit"] .r-head { animation: r-nod .48s ease-in-out 3; transform-origin: 18px 17px; }
+.ico.go[data-mode="rabbit"] .e1 { animation: r-ear .48s ease-in-out 3; transform-origin: 17px 13.4px; }
+.ico.go[data-mode="rabbit"] .e2 { animation: r-ear .48s ease-in-out 3 .03s; transform-origin: 21px 13px; }
+.ico.go[data-mode="rabbit"] .r-hl { animation: r-hind .48s ease-in-out 3; transform-origin: 12.6px 22.8px; }
+.ico.go[data-mode="rabbit"] .r-fl { animation: r-fore .48s ease-in-out 3; transform-origin: 18.2px 25px; }
+@keyframes r-travel { 0% { transform: translateX(-9px); opacity: .4; } 12% { opacity: 1; } 100% { transform: none; } }
+@keyframes r-bound { 0%,100% { transform: translateY(0) rotate(5deg); } 45% { transform: translateY(-6px) rotate(-9deg); } 75% { transform: translateY(-2px) rotate(2deg); } }
+@keyframes r-nod { 0%,100% { transform: rotate(4deg); } 45% { transform: rotate(-6deg); } }
+@keyframes r-ear { 0%,100% { transform: rotate(4deg); } 45% { transform: rotate(26deg); } 75% { transform: rotate(10deg); } }
+@keyframes r-hind { 0%,100% { transform: rotate(-30deg); } 40% { transform: rotate(42deg); } 70% { transform: rotate(-8deg); } }
+@keyframes r-fore { 0%,100% { transform: rotate(18deg); } 45% { transform: rotate(-42deg); } 75% { transform: rotate(-10deg); } }
+
+.ico.go[data-mode="tortoise"] svg { animation: t-travel 3.1s ease-out; }
+.ico.go[data-mode="tortoise"] .t-leg { animation: t-step 1.5s ease-in-out 2; }
+.ico.go[data-mode="tortoise"] .t-leg.l1 { transform-origin: 50% 22.2px; }
+.ico.go[data-mode="tortoise"] .t-leg.l2 { animation-delay: .75s; }
+.ico.go[data-mode="tortoise"] .t-shell { animation: t-sway 1.5s ease-in-out 2; transform-origin: 13px 22px; }
+.ico.go[data-mode="tortoise"] .t-head { animation: t-head 1.5s ease-in-out 2; transform-origin: 23px 20px; }
+.ico.go[data-mode="tortoise"] .t-tail { animation: t-tail 1.5s ease-in-out 2; transform-origin: 3.8px 21.4px; }
+@keyframes t-travel { 0% { transform: translateX(-7px); opacity: .4; } 10% { opacity: 1; } 100% { transform: none; } }
+@keyframes t-step { 0%,100% { transform: translateX(-1.2px); } 25% { transform: translateX(-1.8px) translateY(-1.8px) rotate(14deg); } 55% { transform: translateX(1.4px) translateY(-.6px) rotate(-10deg); } 80% { transform: translateX(0); } }
+@keyframes t-sway { 0%,100% { transform: translateY(0) rotate(0); } 25% { transform: translateY(-.7px) rotate(-1.6deg); } 75% { transform: translateY(-.4px) rotate(1.6deg); } }
+@keyframes t-head { 0%,100% { transform: translateX(-.6px); } 40% { transform: translateX(1.8px) rotate(-5deg); } 70% { transform: translateX(.6px) rotate(2deg); } }
+@keyframes t-tail { 0%,100% { transform: rotate(0); } 50% { transform: rotate(-14deg); } }
 
 .end { margin: 2.2rem 0 0; font-size: 12px; }
 .end span + span::before { content: "·"; margin: 0 .6em; color: var(--rule); }

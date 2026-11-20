@@ -110,7 +110,7 @@
     var now = m || mode;
     if (lastPainted !== null && lastPainted !== now && !reduceMotion) {      // the chosen animal moves
       var btn = document.querySelector('.mood .ico[data-mode="' + now + '"]');
-      if (btn) { btn.classList.remove("go"); void btn.offsetWidth; btn.classList.add("go"); setTimeout(function () { btn.classList.remove("go"); }, 2300); }
+      if (btn) { btn.classList.remove("go"); void btn.offsetWidth; btn.classList.add("go"); setTimeout(function () { btn.classList.remove("go"); }, 3400); }
     }
     lastPainted = now;
     var mood = document.querySelector(".mood"); if (mood) mood.setAttribute("data-mode", m || mode);
