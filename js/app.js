@@ -273,7 +273,18 @@
     }).then(function () {
       stage.destroy();
       if (!alive()) return;
+      // the slot was held at the widest word so nothing moved while words changed; now that "Thinker" has settled,
+      // draw the sentence in around it so there is no empty gap after it
+      var natural = Math.ceil(keep.getBoundingClientRect().width);
+      slot.style.transition = "width .8s cubic-bezier(.4, 0, .2, 1)";
+      void slot.offsetWidth;
+      slot.style.width = natural + "px";
+      return sleep(860);
+    }).then(function () {
+      if (!alive()) return;
+      slot.style.transition = "";
       slot.classList.remove("playing");
+      slot.style.width = "";
       words.forEach(function (w) { w.classList.remove("on"); w.style.transition = ""; w.style.opacity = ""; });
     });
   }
