@@ -13,24 +13,23 @@
   var DEFAULT_MODE = "tortoise";
 
   var page = document.getElementById("page");
-  var tabBars = [document.getElementById("tabs-top"), document.getElementById("tabs-foot")];
-  var track = document.getElementById("track");
+  var side = document.getElementById("side");
   var endEl = document.getElementById("end");
+  var track = document.getElementById("track");
   var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   var cache = {};
-  var site = null;
+  var site = {};
   var popovers = null;
-  var current = { section: null, mode: null };
+  var mode = null;          // the mode currently on screen
+  var active = "hi";        // the section currently being read
+  var lockSpy = false;      // ignore the scroll spy while we scroll somewhere on purpose
+  var sectionEls = {};
 
   /* ---------- small helpers ---------- */
 
-  function store(kind) {
-    try { return window[kind]; } catch (e) { return null; }
-  }
-  function get(kind, key) { try { return store(kind).getItem(key); } catch (e) { return null; } }
-  function set(kind, key, val) { try { store(kind).setItem(key, val); } catch (e) { /* private mode */ } }
-
+  function get(kind, key) { try { return window[kind].getItem(key); } catch (e) { return null; } }
+  function set(kind, key, val) { try { window[kind].setItem(key, val); } catch (e) { /* private mode */ } }
   function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
   function fetchText(url) {
@@ -42,9 +41,7 @@
     cache[url].catch(function () { delete cache[url]; });
     return cache[url];
   }
-  function fetchJson(url) {
-    return fetchText(url).then(function (t) { return JSON.parse(t); });
-  }
+  function fetchJson(url) { return fetchText(url).then(function (t) { return JSON.parse(t); }); }
 
   /* ---------- dev mode: ?dev (or localhost) makes placeholders visible ---------- */
   var host = location.hostname;
@@ -52,100 +49,126 @@
     document.body.classList.add("dev");
   }
 
-  /* ---------- routing: #section/mode ---------- */
+  /* ---------- addresses: #section-mode (old #section/mode still works) ---------- */
 
   function parseHash() {
-    var parts = location.hash.replace(/^#/, "").split(/[\/-]/);   // #education-rabbit (old #education/rabbit still works)
+    var parts = location.hash.replace(/^#/, "").split(/[\/-]/);
     var section = SECTIONS.some(function (s) { return s.id === parts[0]; }) ? parts[0] : "hi";
-    var mode = MODES.indexOf(parts[1]) > -1 ? parts[1] : null;
-    if (!mode) {
+    var m = MODES.indexOf(parts[1]) > -1 ? parts[1] : null;
+    if (!m) {
       var saved = get("localStorage", "mode");
-      mode = MODES.indexOf(saved) > -1 ? saved : DEFAULT_MODE;
+      m = MODES.indexOf(saved) > -1 ? saved : DEFAULT_MODE;
     }
-    return { section: section, mode: mode };
+    return { section: section, mode: m };
+  }
+  function hashFor(section, m) { return "#" + section + "-" + m; }
+
+  function writeHash(section, m) {
+    var h = hashFor(section, m);
+    if (location.hash === h) return;
+    try { history.replaceState(null, "", h); } catch (e) { /* sandboxed frame */ }
   }
 
-  function hashFor(section, mode) { return "#" + section + "-" + mode; }
+  /* ---------- the page is one long scroll: a section per tab, snapping one by one ---------- */
 
-  function buildTabs(mode) {
-    tabBars.forEach(function (bar) {
-      bar.innerHTML = "";
-      SECTIONS.forEach(function (s) {
-        var a = document.createElement("a");
-        a.href = hashFor(s.id, mode);
-        a.textContent = s.label;
-        a.dataset.id = s.id;
-        bar.appendChild(a);
-      });
+  function buildSkeleton() {
+    SECTIONS.forEach(function (s) {
+      var sec = document.createElement("section");
+      sec.className = "sec";
+      sec.id = s.id;
+      sec.setAttribute("aria-label", s.label);
+      page.appendChild(sec);
+      sectionEls[s.id] = sec;
+
+      var a = document.createElement("a");
+      a.dataset.id = s.id;
+      a.textContent = s.label;
+      a.href = hashFor(s.id, DEFAULT_MODE);
+      side.appendChild(a);
     });
   }
 
-  function markActive(section, mode) {
-    tabBars.forEach(function (bar) {
-      Array.prototype.forEach.call(bar.children, function (a) {
-        a.href = hashFor(a.dataset.id, mode);
-        if (a.dataset.id === section) a.setAttribute("aria-current", "page");
-        else a.removeAttribute("aria-current");
-      });
+  function markActive(section) {
+    active = section;
+    Array.prototype.forEach.call(side.children, function (a) {
+      a.href = hashFor(a.dataset.id, mode || DEFAULT_MODE);
+      if (a.dataset.id === section) a.setAttribute("aria-current", "true");
+      else a.removeAttribute("aria-current");
     });
+    var label = SECTIONS.filter(function (s) { return s.id === section; })[0].label;
+    document.title = section === "hi" ? "Showkot Shawon" : label + " · Showkot Shawon";
+  }
+
+  function markMode() {
     Array.prototype.forEach.call(document.querySelectorAll(".switch .lab"), function (b) {
       b.setAttribute("aria-pressed", String(b.dataset.mode === mode));
     });
     track.setAttribute("aria-checked", String(mode === "rabbit"));
   }
 
-  function route() {
-    var r = parseHash();
-    var wanted = hashFor(r.section, r.mode);
-    if (location.hash !== wanted) { try { history.replaceState(null, "", wanted); } catch (e) { location.hash = wanted; } }
-    show(r.section, r.mode);
-  }
-
-  /* ---------- rendering ---------- */
-
-  function show(section, mode) {
-    closeCard();
-    var changed = current.section !== null && (current.section !== section || current.mode !== mode);
-    current = { section: section, mode: mode };
-    set("localStorage", "mode", mode);
-    markActive(section, mode);
-
-    var label = SECTIONS.filter(function (s) { return s.id === section; })[0].label;
-    document.title = section === "hi" ? "Showkot Shawon" : label + " · Showkot Shawon";
-
-    var load = Promise.all([
-      fetchText("content/" + section + "." + mode + ".md").catch(function () { return null; }),
-      site ? Promise.resolve(site) : fetchJson("content/site.json").catch(function () { return {}; })
-    ]);
-
-    var fade = changed && !reduceMotion ? (page.classList.add("fading"), sleep(180)) : Promise.resolve();
-
-    Promise.all([load, fade]).then(function (res) {
-      // ignore stale results if the reader has already moved on
-      if (current.section !== section || current.mode !== mode) return;
-      var md = res[0][0];
-      site = res[0][1];
-
-      page.innerHTML = md === null
-        ? "<p>This page isn't written yet.</p>"
-        : MD.render(md);
-
-      renderEnd(mode);
-      window.scrollTo(0, 0);
-      page.classList.remove("fading");
-
+  function renderAll(m) {
+    mode = m;
+    set("localStorage", "mode", m);
+    markMode();
+    return Promise.all(SECTIONS.map(function (s) {
+      return fetchText("content/" + s.id + "." + m + ".md").catch(function () { return null; });
+    }).concat([fetchJson("content/site.json").catch(function () { return {}; })])).then(function (res) {
+      if (mode !== m) return;                       // the reader already switched again
+      site = res[res.length - 1];
+      SECTIONS.forEach(function (s, i) {
+        var md = res[i];
+        sectionEls[s.id].innerHTML = '<div class="in">' + (md === null ? "<p>This page isn't written yet.</p>" : MD.render(md)) + "</div>";
+      });
+      renderEnd(m);
       var j = page.querySelector(".juggle");
       if (j) startJuggle(j);
     });
   }
 
-  function renderEnd(mode) {
+  function goTo(section, instant) {
+    var el = sectionEls[section];
+    if (!el) return;
+    lockSpy = true;
+    markActive(section);
+    el.scrollIntoView({ behavior: instant || reduceMotion ? "auto" : "smooth", block: "start" });
+    setTimeout(function () { lockSpy = false; }, instant || reduceMotion ? 80 : 900);
+  }
+
+  function route() {
+    var r = parseHash();
+    closeCard();
+    if (r.mode !== mode) {
+      page.classList.add("fading");
+      var fade = mode === null || reduceMotion ? Promise.resolve() : sleep(180);
+      fade.then(function () { return renderAll(r.mode); }).then(function () {
+        page.classList.remove("fading");
+        writeHash(r.section, r.mode);
+        goTo(r.section, true);
+      });
+    } else {
+      writeHash(r.section, r.mode);
+      goTo(r.section, false);
+    }
+  }
+
+  // which section is under the middle of the screen
+  var spy = new IntersectionObserver(function (entries) {
+    if (lockSpy) return;
+    entries.forEach(function (e) {
+      if (e.isIntersecting && e.target.id !== active) {
+        markActive(e.target.id);
+        writeHash(e.target.id, mode);
+      }
+    });
+  }, { rootMargin: "-45% 0px -54% 0px" });
+
+  function renderEnd(m) {
     var bits = [];
     if (site && site.email) bits.push('<span><a href="mailto:' + site.email + '">Write to me</a></span>');
-    (site && site.links || []).forEach(function (l) {
+    ((site && site.links) || []).forEach(function (l) {
       bits.push('<span><a href="' + l.url + '" target="_blank" rel="noopener noreferrer">' + l.label + "</a></span>");
     });
-    if (mode === "rabbit" && site && site.cv) bits.push('<span><a href="' + site.cv + '">CV (PDF)</a></span>');
+    if (m === "rabbit" && site && site.cv) bits.push('<span><a href="' + site.cv + '">CV (PDF)</a></span>');
     endEl.className = "end" + (site && site.placeholder ? " ph" : "");
     endEl.innerHTML = bits.join("");
     endEl.hidden = bits.length === 0;
@@ -155,7 +178,7 @@
      with a blue pen line, and only the last (Thinker) stays. Once per visit. ---------- */
 
   function startJuggle(slot) {
-    if (get("sessionStorage", "juggled") === "1" || reduceMotion || current.mode !== "tortoise" || current.section !== "hi") return;
+    if (get("sessionStorage", "juggled") === "1" || reduceMotion || mode !== "tortoise") return;
     set("sessionStorage", "juggled", "1");
 
     var words = Array.prototype.slice.call(slot.querySelectorAll(".w"));
@@ -268,21 +291,26 @@
 
   window.addEventListener("resize", function () { closeCard(); });
 
-  /* ---------- toggle + boot ---------- */
+  /* ---------- switch + boot ---------- */
 
-  function setMode(mode) {
-    var r = parseHash();
-    if (r.mode === mode) return;
-    location.hash = hashFor(r.section, mode);
+  function setMode(m) {
+    if (m === mode) return;
+    location.hash = hashFor("hi", m);   // switching the way you read starts the reading over
   }
   Array.prototype.forEach.call(document.querySelectorAll(".switch .lab"), function (b) {
     b.addEventListener("click", function () { setMode(b.dataset.mode); });
   });
-  track.addEventListener("click", function () {
-    setMode(parseHash().mode === "rabbit" ? "tortoise" : "rabbit");
+  track.addEventListener("click", function () { setMode(mode === "rabbit" ? "tortoise" : "rabbit"); });
+
+  side.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest("a");
+    if (!a) return;
+    e.preventDefault();
+    location.hash = hashFor(a.dataset.id, mode || DEFAULT_MODE);
   });
 
-  buildTabs(DEFAULT_MODE);
+  buildSkeleton();
+  SECTIONS.forEach(function (s) { spy.observe(sectionEls[s.id]); });
   window.addEventListener("hashchange", route);
   route();
 })();

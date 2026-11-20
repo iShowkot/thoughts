@@ -69,7 +69,7 @@ GitHub repo, Settings, Pages: deploy from the `main` branch, root folder. The si
 
 ## Layout
 
-On wide screens a quiet tab strip sits at the top and scrolls away with the page. On phones there is no top strip: the tabs sit at the end of each page. The Tortoise / Rabbit switch is always at the end of the page. Contact and links are the last, smallest line.
+One long page, one section per tab, and scrolling settles on each section in turn. On wide screens a quiet vertical list of sections sits on the left. On phones there are no tabs at all, only the scroll. The Tortoise / Rabbit switch is at the very end of the page, followed by the contact line. Switching starts the reading over from Hi.
 
 ## Addresses
 
