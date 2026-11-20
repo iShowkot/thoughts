@@ -250,14 +250,16 @@
     return { parts: parts, cx: minx + w / 2, cy: miny + h / 2, w: w, h: h, stride: stride };
   };
 
+  var SLOW = 1.9;                               // the words change at a readable pace
+
   Stage.prototype.start = function (wordEl, name, afterFraction) {
     var self = this, e = EFFECTS[name] || EFFECTS.dust;
     var s = this.sample(wordEl, e.stride);
-    var sys = { e: e, parts: s.parts, cx: s.cx, cy: s.cy, w: s.w, h: s.h, stride: e.stride, dur: e.dur, t0: performance.now(), done: null };
+    var sys = { e: e, parts: s.parts, cx: s.cx, cy: s.cy, w: s.w, h: s.h, stride: e.stride, dur: e.dur * SLOW, t0: performance.now(), done: null };
     s.parts.forEach(function (p) { e.init(p, sys); });
 
     var finished = new Promise(function (res) { sys.done = res; });
-    var half = new Promise(function (res) { setTimeout(res, e.dur * afterFraction); });
+    var half = new Promise(function (res) { setTimeout(res, e.dur * SLOW * afterFraction); });
     this.systems.push(sys);
     this.frame(sys.t0);                      // draw the first frame before the real text is hidden
     return { half: half, finished: finished };

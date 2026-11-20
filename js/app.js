@@ -251,12 +251,12 @@
     var stage = Burst.create(slot);
     function alive() { return slot.isConnected; }
 
-    var chain = sleep(450);                              // the first word has been sitting there; give it a beat
+    var chain = sleep(900);                              // the first word has been sitting there; give it a beat
     words.slice(0, -1).forEach(function (w, i) {
       chain = chain.then(function () {
         if (!alive()) return;
         if (i > 0) w.classList.add("on");
-        return sleep(i > 0 ? 460 : 0).then(function () {   // arrives, is read, then leaves
+        return sleep(i > 0 ? 1000 : 0).then(function () {   // arrives, is read, then leaves
           if (!alive()) return;
           return stage.out(w, Burst.forWord(w.textContent));
         });
@@ -268,7 +268,7 @@
     }).then(function () {
       if (!alive()) return;
       keep.classList.add("on");
-      return sleep(320);
+      return sleep(500);
     }).then(function () {
       stage.destroy();
       if (!alive()) return;
