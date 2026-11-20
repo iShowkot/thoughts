@@ -24,6 +24,8 @@
   var active = "hi";        // the section currently being read
   var lockSpy = false;      // ignore the scroll spy while we scroll somewhere on purpose
   var sectionEls = {};
+  var juggled = false;      // the opening line plays once per page load, when you can actually see it
+  var juggleWatch = null;
 
   /* ---------- small helpers ---------- */
 
@@ -124,7 +126,16 @@
       });
       renderEnd(m);
       var j = page.querySelector(".juggle");
-      if (j) startJuggle(j);
+      if (juggleWatch) { juggleWatch.disconnect(); juggleWatch = null; }
+      if (j && !juggled && "IntersectionObserver" in window) {
+        juggleWatch = new IntersectionObserver(function (entries) {
+          if (entries.some(function (e) { return e.isIntersecting; })) {
+            juggleWatch.disconnect(); juggleWatch = null;
+            startJuggle(j);
+          }
+        }, { threshold: 0.9 });
+        juggleWatch.observe(j);
+      }
     });
   }
 
@@ -181,8 +192,8 @@
      and only the last (Thinker) stays. Once per visit. ---------- */
 
   function startJuggle(slot) {
-    if (get("sessionStorage", "juggled") === "1" || reduceMotion || mode !== "tortoise" || !window.Burst) return;
-    set("sessionStorage", "juggled", "1");
+    if (juggled || reduceMotion || mode !== "tortoise" || !window.Burst) return;
+    juggled = true;
 
     var words = Array.prototype.slice.call(slot.querySelectorAll(".w"));
     if (words.length < 2) return;
