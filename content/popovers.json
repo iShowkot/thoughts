@@ -1,0 +1,32 @@
+{
+  "tutor-lms": {
+    "title": "Tutor LMS",
+    "text": "A WordPress learning management system plugin. One of the two products I lead design for at Ollyo.",
+    "link": { "label": "Visit Tutor LMS", "url": "https://tutorlms.com" }
+  },
+  "kirki": {
+    "title": "Kirki",
+    "text": "A WordPress site-building product from Ollyo. A short note on my part in it goes here.",
+    "placeholder": true
+  },
+  "kirki-ecommerce": {
+    "title": "Kirki eCommerce",
+    "text": "The eCommerce side of Kirki, the other product I lead design for at Ollyo.",
+    "placeholder": true
+  },
+  "easystore": {
+    "title": "EasyStore",
+    "text": "A short note on what EasyStore is and what I did on it goes here.",
+    "placeholder": true
+  },
+  "growfund": {
+    "title": "GrowFund",
+    "text": "A short note on what GrowFund is and what I did on it goes here.",
+    "placeholder": true
+  },
+  "artwork-sample": {
+    "title": "Artwork title",
+    "text": "Year, medium, size. A photo of the piece would sit above this text.",
+    "placeholder": true
+  }
+}

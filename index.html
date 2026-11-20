@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Showkot Shawon</title>
+  <meta name="description" content="Showkot Shawon: designer, artist, poet, writer, observer, mentor, thinker.">
+  <meta name="theme-color" content="#FBF9F4">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Ccircle cx=%2216%22 cy=%2216%22 r=%2210%22 fill=%22%231D3FBF%22/%3E%3C/svg%3E">
+  <link rel="preload" href="fonts/source-serif-4-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="top">
+    <nav class="tabs" id="tabs" aria-label="Sections"></nav>
+    <div class="mode" role="group" aria-label="Reading mode">
+      <button type="button" data-mode="tortoise" aria-pressed="true">Tortoise</button>
+      <span aria-hidden="true">/</span>
+      <button type="button" data-mode="rabbit" aria-pressed="false">Rabbit</button>
+    </div>
+  </header>
+
+  <main id="page" tabindex="-1" aria-live="polite">
+    <noscript><p>This site needs JavaScript to switch between the slow way (Tortoise) and the quick way (Rabbit).</p></noscript>
+  </main>
+
+  <footer class="end" id="end" hidden></footer>
+
+  <script src="js/markdown.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
