@@ -62,11 +62,27 @@
   }
   function hashFor(section, m) { return "#" + section + "-" + m; }
 
-  function writeHash(section, m) {
+  var hashTimer = null;
+  function writeHash(section, m, now) {
     var h = hashFor(section, m);
-    if (location.hash === h) return;
-    try { history.replaceState(null, "", h); } catch (e) { /* sandboxed frame */ }
+    clearTimeout(hashTimer);
+    var go = function () {
+      if (location.hash === h) return;
+      try { history.replaceState(null, "", h); } catch (e) { /* sandboxed frame */ }
+    };
+    if (now) go(); else hashTimer = setTimeout(go, 300);   // never touch the address bar mid-scroll
   }
+
+  // sections taller than the screen scroll freely; only shorter ones snap
+  function markTall() {
+    SECTIONS.forEach(function (s) {
+      var sec = sectionEls[s.id];
+      sec.classList.toggle("tall", sec.scrollHeight > window.innerHeight + 4);
+    });
+  }
+  var resizeTimer = null;
+  window.addEventListener("resize", function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(markTall, 150); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(markTall);
 
   /* ---------- the page is one long scroll: a section per tab, snapping one by one ---------- */
 
@@ -118,6 +134,7 @@
         sectionEls[s.id].innerHTML = '<div class="in">' + (md === null ? "<p>This page isn't written yet.</p>" : MD.render(md)) + "</div>";
       });
       renderEnd(m);
+      markTall();
       var j = page.querySelector(".juggle");
       if (j) startJuggle(j);
     });
@@ -140,11 +157,11 @@
       var fade = mode === null || reduceMotion ? Promise.resolve() : sleep(180);
       fade.then(function () { return renderAll(r.mode); }).then(function () {
         page.classList.remove("fading");
-        writeHash(r.section, r.mode);
+        writeHash(r.section, r.mode, true);
         goTo(r.section, true);
       });
     } else {
-      writeHash(r.section, r.mode);
+      writeHash(r.section, r.mode, true);
       goTo(r.section, false);
     }
   }
@@ -293,7 +310,7 @@
 
   function setMode(m) {
     if (m === mode) return;
-    location.hash = hashFor("hi", m);   // switching the way you read starts the reading over
+    location.hash = hashFor(active, m);   // stay in the same section, read it the other way
   }
   Array.prototype.forEach.call(document.querySelectorAll(".mood .ico"), function (b) {
     b.addEventListener("click", function () { setMode(b.dataset.mode); });

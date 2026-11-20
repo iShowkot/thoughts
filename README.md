@@ -69,7 +69,7 @@ GitHub repo, Settings, Pages: deploy from the `main` branch, root folder. The si
 
 ## Layout
 
-One long page, one section per tab, and scrolling settles on each section in turn. On wide screens a quiet vertical list of sections sits on the left. On phones there are no tabs at all, only the scroll. The Tortoise / Rabbit mood switch (two small icons, like a light/dark switch) is at the very end of the page, followed by the contact line. Switching starts the reading over from Hi.
+One long page, one section per tab, and scrolling settles on each section in turn. On wide screens a quiet vertical list of sections sits on the left. On phones there are no tabs at all, only the scroll. The Tortoise / Rabbit mood switch (two small icons, like a light/dark switch) stays pinned in the bottom-right corner so it can be changed at any moment, and switching keeps you in the same section. The contact line is the last, smallest thing at the end.
 
 ## Addresses
 
