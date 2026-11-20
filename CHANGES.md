@@ -32,3 +32,5 @@ Your Hi and Education text was kept as written, with only mistakes fixed. Reject
 "Ha ha...", the sentence fragments, "Btw", "pagebook", and your line rhythm.
 
 - Rabbit Hi: the list "Designer, artist, poet, writer, observer, mentor and thinker" became "a {{juggle: …}}" so the same opening-line effect plays in both modes (screen readers still get the full list).
+
+- Hi (both modes): the article now rotates with the word ("a Designer", "an Artist", "an Observer"...) so the grammar is right at every moment.

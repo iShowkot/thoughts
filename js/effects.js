@@ -316,6 +316,6 @@
 
   root.Burst = {
     create: function (slot) { return new Stage(slot); },
-    forWord: function (text) { return BY_WORD[String(text).toLowerCase()] || "dust"; }
+    forWord: function (text) { return BY_WORD[String(text).toLowerCase().replace(/^an?\s+/, "")] || "dust"; }
   };
 })(typeof window !== "undefined" ? window : this);
