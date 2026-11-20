@@ -151,7 +151,7 @@ p br { line-height: 1.9; }
   color: var(--quiet); background: none; border: 0; border-radius: 50%;
   transition: color .3s ease, transform .25s cubic-bezier(.34, 1.56, .5, 1);
 }
-.ico svg { width: 1.55rem; height: 1.55rem; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.ico svg { width: 1.6rem; height: 1.6rem; fill: currentColor; stroke: none; }
 .ico:hover { color: var(--ink); }
 .ico:active { transform: scale(.88); }
 .ico[aria-pressed="true"], .ico[aria-pressed="true"]:hover { color: var(--blue); }
