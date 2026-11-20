@@ -73,7 +73,7 @@ On wide screens a quiet tab strip sits at the top and scrolls away with the page
 
 ## Addresses
 
-Pages are addressed `#section/mode`, for example `/#education/rabbit`, so you can share the Rabbit view of any page directly.
+Pages are addressed `#section-mode`, for example `/#education-rabbit` (the older `#education/rabbit` still works), so you can share the Rabbit view of any page directly.
 
 ## Fonts
 

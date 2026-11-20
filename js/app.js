@@ -55,7 +55,7 @@
   /* ---------- routing: #section/mode ---------- */
 
   function parseHash() {
-    var parts = location.hash.replace(/^#/, "").split("/");
+    var parts = location.hash.replace(/^#/, "").split(/[\/-]/);   // #education-rabbit (old #education/rabbit still works)
     var section = SECTIONS.some(function (s) { return s.id === parts[0]; }) ? parts[0] : "hi";
     var mode = MODES.indexOf(parts[1]) > -1 ? parts[1] : null;
     if (!mode) {
@@ -65,7 +65,7 @@
     return { section: section, mode: mode };
   }
 
-  function hashFor(section, mode) { return "#" + section + "/" + mode; }
+  function hashFor(section, mode) { return "#" + section + "-" + mode; }
 
   function buildTabs(mode) {
     tabBars.forEach(function (bar) {
@@ -97,7 +97,7 @@
   function route() {
     var r = parseHash();
     var wanted = hashFor(r.section, r.mode);
-    if (location.hash !== wanted) history.replaceState(null, "", wanted);
+    if (location.hash !== wanted) { try { history.replaceState(null, "", wanted); } catch (e) { location.hash = wanted; } }
     show(r.section, r.mode);
   }
 
