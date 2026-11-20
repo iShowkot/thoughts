@@ -127,7 +127,9 @@
       renderEnd(m);
       var j = page.querySelector(".juggle");
       if (juggleWatch) { juggleWatch.disconnect(); juggleWatch = null; }
-      if (j && !juggled && "IntersectionObserver" in window) {
+      if (j && willPlay() && !("IntersectionObserver" in window)) startJuggle(j);
+      else if (j && willPlay()) {
+        prepJuggle(j);
         juggleWatch = new IntersectionObserver(function (entries) {
           if (entries.some(function (e) { return e.isIntersecting; })) {
             juggleWatch.disconnect(); juggleWatch = null;
@@ -191,33 +193,49 @@
   /* ---------- the opening line: words arrive one by one, each disintegrates in its own way,
      and only the last (Thinker) stays. Once per visit. ---------- */
 
-  function startJuggle(slot) {
-    if (juggled || reduceMotion || mode !== "tortoise" || !window.Burst) return;
-    juggled = true;
+  function juggleWords(slot) { return Array.prototype.slice.call(slot.querySelectorAll(".w")); }
 
-    var words = Array.prototype.slice.call(slot.querySelectorAll(".w"));
-    if (words.length < 2) return;
-    var keep = words[words.length - 1];
-
-    // freeze the slot at the widest word so the sentence around it never moves
+  // Put the line in its starting state: the first word is already on screen (never an empty gap),
+  // and the slot is frozen at the widest word so the sentence around it will not move.
+  function prepJuggle(slot) {
+    var words = juggleWords(slot);
+    if (words.length < 2) return false;
+    var keep = words[words.length - 1], first = words[0];
     var widest = 0;
     words.forEach(function (w) { widest = Math.max(widest, w.getBoundingClientRect().width); });
     slot.style.width = Math.ceil(widest) + "px";
-    keep.style.transition = "none";            // no flash of the final word before it is gathered
+    keep.style.transition = "none"; first.style.transition = "none";
     slot.classList.add("playing");
     words.forEach(function (w) { w.classList.remove("on"); });
-    void keep.offsetWidth;
-    keep.style.transition = "";
+    first.classList.add("on");
+    void slot.offsetWidth;
+    keep.style.transition = ""; first.style.transition = "";
+    return true;
+  }
+
+  function willPlay() { return !juggled && !reduceMotion && mode === "tortoise" && !!window.Burst; }
+
+  function startJuggle(slot) {
+    if (!willPlay()) return;
+    juggled = true;
+    if (!slot.classList.contains("playing") && !prepJuggle(slot)) return;
+
+    var words = juggleWords(slot);
+    var keep = words[words.length - 1];
+    // fonts may have settled since the slot was prepared: re-measure so the slot is exactly the widest word
+    var widest = 0;
+    words.forEach(function (w) { widest = Math.max(widest, w.getBoundingClientRect().width); });
+    slot.style.width = Math.ceil(widest) + "px";
 
     var stage = Burst.create(slot);
     function alive() { return slot.isConnected; }
 
-    var chain = sleep(700);
-    words.slice(0, -1).forEach(function (w) {
+    var chain = sleep(450);                              // the first word has been sitting there; give it a beat
+    words.slice(0, -1).forEach(function (w, i) {
       chain = chain.then(function () {
         if (!alive()) return;
-        w.classList.add("on");
-        return sleep(460).then(function () {            // arrives, is read, then leaves
+        if (i > 0) w.classList.add("on");
+        return sleep(i > 0 ? 460 : 0).then(function () {   // arrives, is read, then leaves
           if (!alive()) return;
           return stage.out(w, Burst.forWord(w.textContent));
         });
