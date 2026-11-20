@@ -29,7 +29,7 @@
       var plain = words.join(", ");
       var spans = words.map(function (w, i) {
         var last = i === words.length - 1;
-        return '<span class="w' + (last ? " stay" : "") + '" data-i="' + i + '">' + w + (last ? "" : "<i>,</i>") + "</span>";
+        return '<span class="w' + (last ? " stay" : "") + '" data-i="' + i + '">' + w + "</span>";
       }).join("");
       return '<span class="sr-only">' + plain + '</span><span class="juggle" aria-hidden="true">' + spans + "</span>";
     });

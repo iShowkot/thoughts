@@ -29,7 +29,7 @@ Sections: `hi`, `education`, `designs`, `poetry`, `artworks`, `infinity`.
 | `[text](https://example.com)` | a real link (solid underline) |
 | `[text]{key}` | a popover card (dotted underline), defined in `content/popovers.json` |
 | `**bold**` `*italic*` | bold, italic |
-| `{{juggle: A\|B\|C}}` | the opening-line word shuffle; the last word is the one that stays |
+| `{{juggle: A\|B\|C}}` | the opening line: words arrive one by one, each struck through with a blue pen line; the last word is the one that stays |
 | `[[placeholder]]` at the end of a paragraph or list item | flags it as made-up text |
 
 ### Popovers
@@ -66,6 +66,10 @@ then open http://localhost:8000/ (the site loads its pages with `fetch`, so open
 ## Publishing
 
 GitHub repo, Settings, Pages: deploy from the `main` branch, root folder. The site will be at `https://ishowkot.github.io/thoughts/`. All paths are relative, so a custom domain can be added later without changing any code.
+
+## Layout
+
+On wide screens a quiet tab strip sits at the top and scrolls away with the page. On phones there is no top strip: the tabs sit at the end of each page. The Tortoise / Rabbit switch is always at the end of the page. Contact and links are the last, smallest line.
 
 ## Addresses
 

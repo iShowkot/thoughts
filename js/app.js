@@ -13,7 +13,8 @@
   var DEFAULT_MODE = "tortoise";
 
   var page = document.getElementById("page");
-  var tabsEl = document.getElementById("tabs");
+  var tabBars = [document.getElementById("tabs-top"), document.getElementById("tabs-foot")];
+  var track = document.getElementById("track");
   var endEl = document.getElementById("end");
   var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -67,29 +68,30 @@
   function hashFor(section, mode) { return "#" + section + "/" + mode; }
 
   function buildTabs(mode) {
-    tabsEl.innerHTML = "";
-    SECTIONS.forEach(function (s) {
-      var a = document.createElement("a");
-      a.href = hashFor(s.id, mode);
-      a.textContent = s.label;
-      a.dataset.id = s.id;
-      tabsEl.appendChild(a);
+    tabBars.forEach(function (bar) {
+      bar.innerHTML = "";
+      SECTIONS.forEach(function (s) {
+        var a = document.createElement("a");
+        a.href = hashFor(s.id, mode);
+        a.textContent = s.label;
+        a.dataset.id = s.id;
+        bar.appendChild(a);
+      });
     });
   }
 
   function markActive(section, mode) {
-    Array.prototype.forEach.call(tabsEl.children, function (a) {
-      a.href = hashFor(a.dataset.id, mode);
-      if (a.dataset.id === section) {
-        a.setAttribute("aria-current", "page");
-        if (a.scrollIntoView) a.scrollIntoView({ inline: "center", block: "nearest", behavior: reduceMotion ? "auto" : "smooth" });
-      } else {
-        a.removeAttribute("aria-current");
-      }
+    tabBars.forEach(function (bar) {
+      Array.prototype.forEach.call(bar.children, function (a) {
+        a.href = hashFor(a.dataset.id, mode);
+        if (a.dataset.id === section) a.setAttribute("aria-current", "page");
+        else a.removeAttribute("aria-current");
+      });
     });
-    Array.prototype.forEach.call(document.querySelectorAll(".mode button"), function (b) {
+    Array.prototype.forEach.call(document.querySelectorAll(".switch .lab"), function (b) {
       b.setAttribute("aria-pressed", String(b.dataset.mode === mode));
     });
+    track.setAttribute("aria-checked", String(mode === "rabbit"));
   }
 
   function route() {
@@ -149,53 +151,55 @@
     endEl.hidden = bits.length === 0;
   }
 
-  /* ---------- the opening line: words juggle once per visit, then Thinker stays ---------- */
+  /* ---------- the opening line: words arrive one by one, each struck through
+     with a blue pen line, and only the last (Thinker) stays. Once per visit. ---------- */
 
-  function startJuggle(el) {
+  function startJuggle(slot) {
     if (get("sessionStorage", "juggled") === "1" || reduceMotion || current.mode !== "tortoise" || current.section !== "hi") return;
     set("sessionStorage", "juggled", "1");
 
-    var words = Array.prototype.slice.call(el.querySelectorAll(".w"));
-    if (words.length < 3) return;
-    var original = words.slice();
-    el.classList.add("shuffling");
+    var words = Array.prototype.slice.call(slot.querySelectorAll(".w"));
+    if (words.length < 2) return;
+    var keep = words[words.length - 1];
 
-    function arrange(order) {
-      var first = words.map(function (w) { return w.getBoundingClientRect(); });
-      order.forEach(function (w) { el.appendChild(w); });
-      words.forEach(function (w, i) {
-        var now = w.getBoundingClientRect();
-        var dx = first[i].left - now.left, dy = first[i].top - now.top;
-        if (dx || dy) {
-          w.animate([{ transform: "translate(" + dx + "px," + dy + "px)" }, { transform: "none" }],
-            { duration: 380, easing: "ease-in-out" });
-        }
+    // measure while everything is in its resting state, then freeze the slot at the widest word
+    var widest = 0;
+    words.forEach(function (w) { widest = Math.max(widest, w.getBoundingClientRect().width); });
+    var finalWidth = keep.getBoundingClientRect().width;
+    slot.style.width = Math.ceil(widest) + "px";
+    slot.classList.add("playing");
+    words.forEach(function (w) { w.classList.remove("on", "struck"); });
+
+    function alive() { return slot.isConnected; }
+
+    function showAndStrike(w) {
+      w.classList.add("on");
+      return sleep(300).then(function () {
+        if (!alive()) return;
+        w.classList.add("struck");
+        return sleep(420);
+      }).then(function () {
+        if (!alive()) return;
+        w.classList.remove("on");
+        return sleep(240);
       });
     }
 
-    function shuffled() {
-      var a = words.slice();
-      for (var i = a.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        var t = a[i]; a[i] = a[j]; a[j] = t;
-      }
-      return a;
-    }
-
-    (function run() {
-      var steps = 5;
-      sleep(600).then(function loop() {
-        if (!el.isConnected) return;
-        if (steps-- > 0) {
-          arrange(shuffled());
-          return sleep(440).then(loop);
-        }
-        arrange(original);
-        return sleep(400).then(function () {
-          if (el.isConnected) el.classList.remove("shuffling");
-        });
-      });
-    })();
+    var chain = sleep(700);
+    words.slice(0, -1).forEach(function (w) {
+      chain = chain.then(function () { return alive() ? showAndStrike(w) : null; });
+    });
+    chain.then(function () {
+      if (!alive()) return;
+      keep.classList.add("on");
+      slot.style.width = Math.ceil(finalWidth) + "px";
+      return sleep(700);
+    }).then(function () {
+      if (!alive()) return;
+      slot.classList.remove("playing");
+      slot.style.width = "";
+      words.forEach(function (w) { w.classList.remove("on", "struck"); });
+    });
   }
 
   /* ---------- popover cards ---------- */
@@ -266,12 +270,16 @@
 
   /* ---------- toggle + boot ---------- */
 
-  Array.prototype.forEach.call(document.querySelectorAll(".mode button"), function (b) {
-    b.addEventListener("click", function () {
-      var r = parseHash();
-      if (r.mode === b.dataset.mode) return;
-      location.hash = hashFor(r.section, b.dataset.mode);
-    });
+  function setMode(mode) {
+    var r = parseHash();
+    if (r.mode === mode) return;
+    location.hash = hashFor(r.section, mode);
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".switch .lab"), function (b) {
+    b.addEventListener("click", function () { setMode(b.dataset.mode); });
+  });
+  track.addEventListener("click", function () {
+    setMode(parseHash().mode === "rabbit" ? "tortoise" : "rabbit");
   });
 
   buildTabs(DEFAULT_MODE);
