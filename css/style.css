@@ -139,14 +139,22 @@ p br { line-height: 1.9; }
   background: var(--paper); border: 1px solid var(--rule); border-radius: 999px;
   box-shadow: 0 2px 10px rgba(31, 29, 26, .08);
 }
+.mood::before {                                   /* the sliding pill behind the active icon */
+  content: ""; position: absolute; top: .2rem; left: .2rem; width: 2.3rem; height: 2.3rem; border-radius: 50%;
+  background: var(--blue-soft); z-index: 0;
+  transition: transform .42s cubic-bezier(.34, 1.4, .5, 1);
+}
+.mood[data-mode="rabbit"]::before { transform: translateX(calc(2.3rem + .15rem)); }
 .ico {
+  position: relative; z-index: 1; -webkit-tap-highlight-color: transparent; touch-action: manipulation;
   width: 2.3rem; height: 2.3rem; padding: 0; display: grid; place-items: center; cursor: pointer;
   color: var(--quiet); background: none; border: 0; border-radius: 50%;
-  transition: color .2s ease, background-color .2s ease;
+  transition: color .3s ease, transform .25s cubic-bezier(.34, 1.56, .5, 1);
 }
 .ico svg { width: 1.55rem; height: 1.55rem; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .ico:hover { color: var(--ink); }
-.ico[aria-pressed="true"], .ico[aria-pressed="true"]:hover { color: var(--blue); background: var(--blue-soft); }
+.ico:active { transform: scale(.88); }
+.ico[aria-pressed="true"], .ico[aria-pressed="true"]:hover { color: var(--blue); }
 
 .end { margin: 2.2rem 0 0; font-size: 12px; }
 .end span + span::before { content: "·"; margin: 0 .6em; color: var(--rule); }
@@ -165,6 +173,6 @@ body.dev .end.ph { outline: none; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   main { transition: none; }
-  .juggle .w, .ico { transition: none; }
+  .juggle .w, .ico, .mood::before { transition: none; }
   .sec a:hover, .end a:hover, .card a:hover, .pop:hover, .pop[aria-expanded="true"] { animation: none; transform: none; }
 }

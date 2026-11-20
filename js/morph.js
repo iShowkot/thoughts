@@ -94,7 +94,7 @@
 
   function cut(bmp, dpr, ts) {
     var tsd = Math.round(ts * dpr), W = bmp.width, H = bmp.height;
-    var data = bmp.getContext("2d", { willReadFrequently: true }).getImageData(0, 0, W, H).data;
+    var data = bmp._d || (bmp._d = bmp.getContext("2d", { willReadFrequently: true }).getImageData(0, 0, W, H).data);
     var tiles = [];
     for (var ty = 0; ty < H; ty += tsd) {
       for (var tx = 0; tx < W; tx += tsd) {
@@ -109,6 +109,16 @@
       }
     }
     return tiles;
+  }
+
+  var MAX_TILES = 1500;
+  function cutCapped(bmp, dpr, ts) {
+    var t = cut(bmp, dpr, ts);
+    if (t.length > MAX_TILES) {                       // bigger tiles: same look, far fewer draws per frame
+      ts = ts * Math.sqrt(t.length / MAX_TILES) * 1.05;
+      t = cut(bmp, dpr, ts);
+    }
+    return { tiles: t, ts: ts };
   }
 
   /* ---------- the two characters ---------- */
@@ -147,8 +157,10 @@
 
   var locked = false;
   function stop(e) { e.preventDefault(); }
-  function lock() { if (locked) return; locked = true; window.addEventListener("wheel", stop, { passive: false }); window.addEventListener("touchmove", stop, { passive: false }); }
-  function unlock() { locked = false; window.removeEventListener("wheel", stop, { passive: false }); window.removeEventListener("touchmove", stop, { passive: false }); }
+  var coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches, prevOv = "";
+  function lock() { if (locked) return; locked = true;
+    if (coarse) { prevOv = document.documentElement.style.overflow; document.documentElement.style.overflow = "hidden"; } window.addEventListener("wheel", stop, { passive: false }); window.addEventListener("touchmove", stop, { passive: false }); }
+  function unlock() { locked = false; if (coarse) document.documentElement.style.overflow = prevOv; window.removeEventListener("wheel", stop, { passive: false }); window.removeEventListener("touchmove", stop, { passive: false }); }
 
   function frame() { return new Promise(function (r) { requestAnimationFrame(function () { r(); }); }); }
 
@@ -165,23 +177,26 @@
       unlock();
       if (canvas) {
         var c = canvas; canvas = null;
-        c.style.transition = "opacity .14s ease"; c.style.opacity = "0";
-        setTimeout(function () { if (c.parentNode) c.parentNode.removeChild(c); }, 180);
+        // the last tile frame equals the real page; drop the canvas once the real page has painted
+        requestAnimationFrame(function () { requestAnimationFrame(function () { if (c.parentNode) c.parentNode.removeChild(c); }); });
       }
     }
 
+    return new Promise(function (go) { requestAnimationFrame(function () { setTimeout(go, 0); }); }).then(function () { return run(); });
+
+    function run() {
     try {
       lock();
-      var oldBmp = rasterize(dpr), oldTiles = cut(oldBmp, dpr, ts);
+      var oldBmp = rasterize(dpr), oc = cutCapped(oldBmp, dpr, ts), oldTiles = oc.tiles, oldTsd = Math.round(oc.ts * dpr);
 
       canvas = document.createElement("canvas");
       canvas.setAttribute("aria-hidden", "true");
       canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
-      canvas.style.cssText = "position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:45";
+      // exact pixel box of the visible viewport (100vh is taller than the visible area on phones and would stretch the picture)
+      canvas.style.cssText = "position:fixed;left:0;top:0;width:" + W + "px;height:" + H + "px;pointer-events:none;z-index:45";
       var ctx = canvas.getContext("2d");
-      var tsd = Math.round(ts * dpr);
 
-      function drawTile(bmp, p, o) {
+      function drawTile(bmp, p, o, tsd) {
         if (o.a <= 0.01) return;
         var sz = tsd * o.k;
         ctx.globalAlpha = o.a;
@@ -191,7 +206,7 @@
         for (var i = 0; i < oldTiles.length; i++) {
           var p = oldTiles[i], sp = style.outSpread;
           var s = clamp((t - style.outDelay(p) * sp) / (1 - sp));
-          drawTile(oldBmp, p, s <= 0 ? { x: p.x, y: p.y, k: 1, a: 1 } : style.out(p, s));
+          drawTile(oldBmp, p, s <= 0 ? { x: p.x, y: p.y, k: 1, a: 1 } : style.out(p, s), oldTsd);
         }
       }
 
@@ -205,7 +220,7 @@
         document.body.classList.remove("morphing");
         var newBmp = rasterize(dpr);
         document.body.classList.add("morphing");
-        var newTiles = cut(newBmp, dpr, ts);
+        var nc = cutCapped(newBmp, dpr, ts), newTiles = nc.tiles, newTsd = Math.round(nc.ts * dpr);
         var t0 = performance.now(), total = style.inStart + style.inDur;
 
         return new Promise(function (resolve) {
@@ -220,7 +235,7 @@
                 var p = newTiles[i], sp = style.inSpread;
                 var s = clamp((ti - style.inDelay(p) * sp) / (1 - sp));
                 if (ti < style.inDelay(p) * sp) continue;
-                drawTile(newBmp, p, style.inn(p, s));
+                drawTile(newBmp, p, style.inn(p, s), newTsd);
               }
             }
             ctx.globalAlpha = 1;
@@ -232,6 +247,7 @@
     } catch (e) {
       finish();
       return Promise.resolve();
+    }
     }
   }
 

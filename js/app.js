@@ -105,9 +105,10 @@
     document.title = section === "hi" ? "Showkot Shawon" : label + " · Showkot Shawon";
   }
 
-  function markMode() {
+  function markMode(m) {
+    var mood = document.querySelector(".mood"); if (mood) mood.setAttribute("data-mode", m || mode);
     Array.prototype.forEach.call(document.querySelectorAll(".mood .ico"), function (b) {
-      b.setAttribute("aria-pressed", String(b.dataset.mode === mode));
+      b.setAttribute("aria-pressed", String(b.dataset.mode === (m || mode)));
     });
   }
 
@@ -339,6 +340,7 @@
 
   function setMode(m) {
     if (m === mode) return;
+    markMode(m);                          // the switcher answers at once, before the page does
     location.hash = hashFor(active, m);   // stay in the same section, read it the other way
   }
   Array.prototype.forEach.call(document.querySelectorAll(".mood .ico"), function (b) {
