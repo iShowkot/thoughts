@@ -151,7 +151,35 @@ p br { line-height: 1.9; }
   color: var(--quiet); background: none; border: 0; border-radius: 50%;
   transition: color .3s ease, transform .25s cubic-bezier(.34, 1.56, .5, 1);
 }
-.ico svg { width: 1.6rem; height: 1.6rem; fill: currentColor; stroke: none; }
+.ico svg { width: 1.6rem; height: 1.6rem; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; overflow: visible; }
+.ico svg .dot { fill: currentColor; stroke: none; }
+.ico svg * { transform-box: fill-box; transform-origin: 50% 100%; }
+
+/* on switching, the animal that was chosen moves: the rabbit runs, the tortoise plods */
+.ico.go[data-mode="rabbit"] svg { animation: run 1.05s cubic-bezier(.3, .6, .4, 1); }
+.ico.go[data-mode="rabbit"] svg .legA { animation: kick .22s ease-in-out 4; }
+.ico.go[data-mode="tortoise"] svg { animation: plod 2.1s ease-in-out; }
+.ico.go[data-mode="tortoise"] svg .legA { animation: step 1.05s ease-in-out 2; }
+.ico.go[data-mode="tortoise"] svg .legB { animation: step 1.05s ease-in-out 2 .52s; }
+.ico.go[data-mode="tortoise"] svg .bod { animation: rock 1.05s ease-in-out 2; }
+@keyframes run {
+  0%   { transform: translate(-7px, 0) scale(1.08, .92); opacity: .5; }
+  14%  { transform: translate(-3px, -5px) rotate(-5deg); opacity: 1; }
+  28%  { transform: translate(0, 0) scale(1.05, .95); }
+  42%  { transform: translate(2px, -6px) rotate(-6deg); }
+  58%  { transform: translate(3px, 0) scale(1.05, .95); }
+  72%  { transform: translate(1px, -4px) rotate(-3deg); }
+  100% { transform: none; }
+}
+@keyframes kick { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-22deg); } }
+@keyframes plod {
+  0%   { transform: translateX(-6px); opacity: .5; }
+  15%  { opacity: 1; }
+  100% { transform: none; }
+}
+@keyframes step { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1.6px) rotate(8deg); } }
+@keyframes rock { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-3deg); } 75% { transform: rotate(3deg); } }
+
 .ico:hover { color: var(--ink); }
 .ico:active { transform: scale(.88); }
 .ico[aria-pressed="true"], .ico[aria-pressed="true"]:hover { color: var(--blue); }
@@ -174,5 +202,6 @@ body.dev .end.ph { outline: none; }
   html { scroll-behavior: auto; }
   main { transition: none; }
   .juggle .w, .ico, .mood::before { transition: none; }
+  .ico.go svg, .ico.go svg * { animation: none !important; }
   .sec a:hover, .end a:hover, .card a:hover, .pop:hover, .pop[aria-expanded="true"] { animation: none; transform: none; }
 }

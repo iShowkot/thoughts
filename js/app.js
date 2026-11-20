@@ -105,7 +105,14 @@
     document.title = section === "hi" ? "Showkot Shawon" : label + " · Showkot Shawon";
   }
 
+  var lastPainted = null;
   function markMode(m) {
+    var now = m || mode;
+    if (lastPainted !== null && lastPainted !== now && !reduceMotion) {      // the chosen animal moves
+      var btn = document.querySelector('.mood .ico[data-mode="' + now + '"]');
+      if (btn) { btn.classList.remove("go"); void btn.offsetWidth; btn.classList.add("go"); setTimeout(function () { btn.classList.remove("go"); }, 2300); }
+    }
+    lastPainted = now;
     var mood = document.querySelector(".mood"); if (mood) mood.setAttribute("data-mode", m || mode);
     Array.prototype.forEach.call(document.querySelectorAll(".mood .ico"), function (b) {
       b.setAttribute("aria-pressed", String(b.dataset.mode === (m || mode)));
