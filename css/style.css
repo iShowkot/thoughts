@@ -53,6 +53,7 @@ main { outline: none; }
 .sec:first-child { padding-top: 5rem; }
 .sec > .in { width: 100%; max-width: var(--measure); margin: 0 auto; }
 main.fading { opacity: 0; }
+.morphing main, .morphing .foot { visibility: hidden; }   /* the real page waits while its tiles play */
 main { transition: opacity .18s ease; }
 
 h1 { font-size: 1.7em; line-height: 1.2; font-weight: 600; margin: 0 0 1.3rem; letter-spacing: -.01em; }

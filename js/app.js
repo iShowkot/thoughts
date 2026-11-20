@@ -133,7 +133,7 @@
         juggleWatch = new IntersectionObserver(function (entries) {
           if (entries.some(function (e) { return e.isIntersecting; })) {
             juggleWatch.disconnect(); juggleWatch = null;
-            startJuggle(j);
+            (function go() { if (morphing) return setTimeout(go, 250); startJuggle(j); })();
           }
         }, { threshold: 0.9 });
         juggleWatch.observe(j);
@@ -150,17 +150,30 @@
     setTimeout(function () { lockSpy = false; }, instant || reduceMotion ? 80 : 900);
   }
 
+  var morphing = false;
+
   function route() {
+    if (morphing) return;                         // the latest address is picked up when the transition ends
     var r = parseHash();
     closeCard();
     if (r.mode !== mode) {
-      page.classList.add("fading");
-      var fade = mode === null || reduceMotion ? Promise.resolve() : sleep(180);
-      fade.then(function () { return renderAll(r.mode); }).then(function () {
-        page.classList.remove("fading");
-        writeHash(r.section, r.mode, true);
-        goTo(r.section, true);
-      });
+      var swap = function () {
+        return renderAll(r.mode).then(function () {
+          writeHash(r.section, r.mode, true);
+          goTo(r.section, true);
+        });
+      };
+      if (mode !== null && !reduceMotion && window.Morph) {
+        morphing = true;
+        Morph.transition({ to: r.mode, swap: swap }).then(function () {
+          morphing = false;
+          route();                                    // in case the address changed meanwhile
+        });
+      } else {
+        page.classList.add("fading");
+        var fade = mode === null || reduceMotion ? Promise.resolve() : sleep(180);
+        fade.then(swap).then(function () { page.classList.remove("fading"); });
+      }
     } else {
       writeHash(r.section, r.mode, true);
       goTo(r.section, false);
